@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "459322374637",
+    "firebase_url": "https://mercurium-a01ca.firebaseio.com",
+    "project_id": "mercurium-a01ca",
+    "storage_bucket": "mercurium-a01ca.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:459322374637:android:3f1a7593c949d6d3",
+        "android_client_info": {
+          "package_name": "com.example.mbalza.mercurium"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "459322374637-k9f5nr7smo9ajnsqrf4ehkqnugmthskp.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDXTO8cM2n6pqSKt5XfZf0d4WyHVPPk9lA"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
