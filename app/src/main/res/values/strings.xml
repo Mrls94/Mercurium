@@ -1,3 +1,8 @@
 <resources>
     <string name="app_name">Mercurium</string>
+    <string name="client_id">235648539535-3haec8d1e1g2ne5486ln5jsdv7rsl2eq.apps.googleusercontent.com</string>
+    <string name="webClient_id">235648539535-l2thqg5jvd6ju1cqp364foj9h5akobjq.apps.googleusercontent.com</string>
+    <string name="Firebasewebclientid">459322374637-k9f5nr7smo9ajnsqrf4ehkqnugmthskp.apps.googleusercontent.com</string>
+
+
 </resources>

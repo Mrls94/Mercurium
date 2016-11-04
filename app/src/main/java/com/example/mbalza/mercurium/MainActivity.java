@@ -2,6 +2,7 @@ package com.example.mbalza.mercurium;
 
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -12,12 +13,30 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.google.android.gms.auth.api.Auth;
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+import com.google.android.gms.auth.api.signin.GoogleSignInResult;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.SignInButton;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.AuthCredential;
+import com.google.firebase.auth.AuthResult;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseAuthException;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.GoogleAuthProvider;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.messaging.FirebaseMessaging;
+import com.google.firebase.messaging.FirebaseMessagingService;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -27,7 +46,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener{
 
     private Button addButton;
     private EditText room_name;
@@ -38,7 +57,17 @@ public class MainActivity extends AppCompatActivity {
 
     private DatabaseReference root = FirebaseDatabase.getInstance().getReference().getRoot();
 
-    private String name;
+    private FirebaseAuth mAuth;
+    private FirebaseAuth.AuthStateListener mAuthListener;
+
+
+    private String name = "";
+
+    private GoogleApiClient mGoogleApiClient;
+    private GoogleSignInOptions gso;
+    private static final int RC_SIGN_IN = 5678;
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,7 +82,26 @@ public class MainActivity extends AppCompatActivity {
 
         listView.setAdapter(arrayAdapter);
 
-        request_user_name();
+        mAuth = FirebaseAuth.getInstance();
+
+
+
+        gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestEmail()
+                .requestIdToken(getString(R.string.webClient_id))
+                .build();
+
+
+        mGoogleApiClient = new GoogleApiClient.Builder(this)
+                .enableAutoManage(this, this)
+                .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
+                .build();
+
+        if (name.contentEquals(""))
+        {
+            request_user_name();
+        }
+
 
         addButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -104,31 +152,48 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+
+        mAuthListener  = new FirebaseAuth.AuthStateListener() {
+            @Override
+            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
+
+                FirebaseUser user = firebaseAuth.getCurrentUser();
+                if (user!=null)
+                {
+                    //request_user_name();
+                }
+            }
+        };
+
     }
 
     private void request_user_name() {
 
         AlertDialog.Builder builder =  new AlertDialog.Builder(this);
 
-        builder.setTitle("Enter Name: ");
+        builder.setTitle("Sign In: ");
 
         final EditText input_field = new EditText(this);
+        final SignInButton googlebutton = new SignInButton(this);
+        googlebutton.setScopes(gso.getScopeArray());
+        googlebutton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(mGoogleApiClient);
+                startActivityForResult(signInIntent, RC_SIGN_IN);
+            }
+        });
 
-        builder.setView(input_field);
+        builder.setView(googlebutton);
         builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
 
-                name = input_field.getText().toString();
-
-            }
-        });
-
-        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.cancel();
-                request_user_name();
+                if(name == null)
+                {
+                    dialog.cancel();
+                    request_user_name();
+                }
 
             }
         });
@@ -136,4 +201,83 @@ public class MainActivity extends AppCompatActivity {
         builder.show();
 
     }
+
+    @Override
+    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == RC_SIGN_IN) {
+            //Toast.makeText(this,"Entered onActivityResult",Toast.LENGTH_SHORT).show();
+            GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
+            handleSignInResult(result);
+        }
+    }
+
+    private void handleSignInResult(GoogleSignInResult result) {
+
+        if (result.isSuccess()) {
+            // Signed in successfully, show authenticated UI.
+            GoogleSignInAccount acct = result.getSignInAccount();
+            //mStatusTextView.setText(getString(R.string.signed_in_fmt, acct.getDisplayName()));
+            //updateUI(true);
+            name = acct.getDisplayName();
+            Toast.makeText(this,"Welcome "+acct.getDisplayName(),Toast.LENGTH_SHORT).show();
+            fireBaseGoogleSignin(acct);
+
+
+        } else {
+
+            Toast.makeText(this,"no success"+result.getStatus(),Toast.LENGTH_LONG).show();
+
+            // Signed out, show unauthenticated UI.
+            //updateUI(false);
+        }
+
+    }
+
+    private void fireBaseGoogleSignin(GoogleSignInAccount acct) {
+
+        AuthCredential credential = GoogleAuthProvider.getCredential(acct.getIdToken(), null);
+        mAuth.signInWithCredential(credential).addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
+            @Override
+            public void onComplete(@NonNull Task<AuthResult> task) {
+
+                if(!task.isSuccessful())
+                {
+                    Toast.makeText(getApplicationContext(),"Failed Auth Firebase"+task.getException(),Toast.LENGTH_SHORT).show();
+                    System.out.println(task.getException());
+                }
+                else
+                {
+
+                    FirebaseMessaging.getInstance().subscribeToTopic("news");
+                    System.out.println("Subscribed");
+                }
+
+            }
+        });
+
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+
+        mAuth.addAuthStateListener(mAuthListener);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        if (mAuthListener != null) {
+            mAuth.removeAuthStateListener(mAuthListener);
+        }
+    }
+
+
 }
