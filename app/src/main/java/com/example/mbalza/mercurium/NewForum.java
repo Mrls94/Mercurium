@@ -109,6 +109,8 @@ public class NewForum extends AppCompatActivity {
 
                 NotifyforumAsync asyc = new NotifyforumAsync();
                 asyc.execute(forumname);
+                Toast.makeText(getApplicationContext(),"Foro Creado",Toast.LENGTH_SHORT).show();
+                finish();
 
             }
         });
@@ -116,6 +118,8 @@ public class NewForum extends AppCompatActivity {
         root.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
+                list_of_checkbox.clear();
+                ((ViewGroup) findViewById(R.id.ScrollViewLinear)).removeAllViews();
                 listUsersValue(dataSnapshot);
 
             }
