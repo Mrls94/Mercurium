@@ -30,6 +30,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthException;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
+import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -56,12 +57,13 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
     private ArrayList<String> list_of_rooms = new ArrayList<>();
 
     private DatabaseReference root = FirebaseDatabase.getInstance().getReference().getRoot();
+    private DatabaseReference currentUserRoot;
 
     private FirebaseAuth mAuth;
     private FirebaseAuth.AuthStateListener mAuthListener;
 
-
-    private String name = "";
+    private String nonameerror = "Error_5678 No NAME";
+    private String name = nonameerror;
 
     private GoogleApiClient mGoogleApiClient;
     private GoogleSignInOptions gso;
@@ -97,7 +99,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                 .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
                 .build();
 
-        if (name.contentEquals(""))
+        if (name.compareTo(nonameerror)==0)
         {
             request_user_name();
         }
@@ -113,7 +115,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
             }
         });
-
+        /*
         root.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -137,13 +139,14 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
             public void onCancelled(DatabaseError databaseError) {
 
             }
-        });
+        }); */
 
 
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
+                FirebaseMessaging.getInstance().subscribeToTopic(((TextView)view).getText().toString());
                 Intent i = new Intent(getApplicationContext(), Chat_Room.class);
                 i.putExtra("room_name", ((TextView)view).getText().toString());
                 i.putExtra("user_name",name);
@@ -158,9 +161,9 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
             public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
 
                 FirebaseUser user = firebaseAuth.getCurrentUser();
-                if (user!=null)
+                if (user==null)
                 {
-                    //request_user_name();
+                    request_user_name();
                 }
             }
         };
@@ -189,7 +192,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
             @Override
             public void onClick(DialogInterface dialog, int which) {
 
-                if(name == null)
+                if(name.compareTo(nonameerror)==0)
                 {
                     dialog.cancel();
                     request_user_name();
@@ -254,13 +257,107 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                 }
                 else
                 {
-
+                    updateRoot();
                     FirebaseMessaging.getInstance().subscribeToTopic("news");
                     System.out.println("Subscribed");
                 }
 
             }
         });
+
+    }
+
+    private void updateRoot() {
+
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+
+        DatabaseReference userroot = FirebaseDatabase.getInstance().getReference().child("Users");
+        userroot.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                checkUser(dataSnapshot);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+
+
+    }
+
+    public void checkUser(DataSnapshot datasnapchot)
+    {
+        Iterator i = datasnapchot.getChildren().iterator();
+        String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
+
+        Boolean flag = false;
+
+        while (i.hasNext() && !flag)
+        {
+            if(uid.compareTo( ((DataSnapshot) i.next()).getKey() ) == 0 )
+            {
+                flag = true;
+
+                currentUserRoot = root.child("Users").child(uid).child("Forums");
+
+            }
+        }
+
+        if(!flag)
+        {
+            Map<String,Object> map = new HashMap<>();
+
+            map.put(uid,"");
+
+            root.child("Users").updateChildren(map);
+
+            DatabaseReference userroot = root.child("Users").child(uid);
+
+
+            Map<String,Object> map2 = new HashMap<>();
+            map2.put("DisplayName",FirebaseAuth.getInstance().getCurrentUser().getDisplayName());
+
+            Map<String,Object> map4 = new HashMap<>();
+            map4.put("Forums","");
+
+            userroot.updateChildren(map2);
+
+            Map<String,Object> map3 = new HashMap<>();
+            map3.put("name", "General");
+            userroot.child("Forums").updateChildren(map3);
+
+            currentUserRoot = userroot.child("Forums");
+
+
+        }
+
+        currentUserRoot.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+
+                Set<String> set = new HashSet<String>();
+                Iterator i = dataSnapshot.getChildren().iterator();
+
+                while(i.hasNext())
+                {
+                    set.add(((DataSnapshot)i.next()).getValue().toString());
+                }
+
+                list_of_rooms.clear();
+                list_of_rooms.addAll(set);
+
+                arrayAdapter.notifyDataSetChanged();
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+
 
     }
 

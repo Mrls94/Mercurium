@@ -119,7 +119,7 @@ public class NewPost extends AppCompatActivity {
 
                 msg.put("body", roomname+ " - "+usersent+" dice: "+message);
                 notification.put("notification",msg);
-                to.put("to","/topics/news");
+                to.put("to","/topics/"+roomname);
                 parent.put("to", "/topics/news");
                 parent.put("notification", msg);
 
