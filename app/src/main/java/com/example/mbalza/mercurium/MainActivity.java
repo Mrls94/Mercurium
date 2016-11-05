@@ -109,9 +109,14 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
             @Override
             public void onClick(View v) {
 
-                Map<String, Object> map = new HashMap<String, Object>();
-                map.put(room_name.getText().toString(),"" );
-                root.updateChildren(map);
+                Intent i = new Intent(getApplicationContext(),NewForum.class);
+                i.putExtra("username",name);
+                i.putExtra("uid",FirebaseAuth.getInstance().getCurrentUser().getUid());
+                startActivity(i);
+
+                //Map<String, Object> map = new HashMap<String, Object>();
+                //map.put(room_name.getText().toString(),"" );
+                //root.updateChildren(map);
 
             }
         });
@@ -146,7 +151,12 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
-                FirebaseMessaging.getInstance().subscribeToTopic(((TextView)view).getText().toString());
+
+                String roomname = ((TextView)view).getText().toString();
+
+                roomname = roomname.replace(" ", "_");
+
+                FirebaseMessaging.getInstance().subscribeToTopic(roomname);
                 Intent i = new Intent(getApplicationContext(), Chat_Room.class);
                 i.putExtra("room_name", ((TextView)view).getText().toString());
                 i.putExtra("user_name",name);
@@ -325,7 +335,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
             userroot.updateChildren(map2);
 
             Map<String,Object> map3 = new HashMap<>();
-            map3.put("name", "General");
+            map3.put("General","");
             userroot.child("Forums").updateChildren(map3);
 
             currentUserRoot = userroot.child("Forums");
@@ -342,7 +352,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
                 while(i.hasNext())
                 {
-                    set.add(((DataSnapshot)i.next()).getValue().toString());
+                    //set.add(((DataSnapshot)i.next()).getValue().toString());
+                    set.add(((DataSnapshot)i.next()).getKey());
                 }
 
                 list_of_rooms.clear();

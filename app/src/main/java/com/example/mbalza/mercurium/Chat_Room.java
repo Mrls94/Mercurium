@@ -128,7 +128,7 @@ public class Chat_Room extends AppCompatActivity {
             msg = (String)((DataSnapshot)i.next()).getValue();
             uname = (String)((DataSnapshot)i.next()).getValue();
 
-            String added = uname+" Dice:  "+msg+"\n \n";
+            String added = uname+" Dice:  \n"+msg+"\n \n";
 
             chatconvsersation.append(added);
 
