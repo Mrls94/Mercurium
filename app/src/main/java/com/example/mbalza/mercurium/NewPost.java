@@ -20,6 +20,9 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.text.DateFormat;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -60,11 +63,16 @@ public class NewPost extends AppCompatActivity {
                 temp_key = root.push().getKey();
                 root.updateChildren(map);
 
+                String currentDateTimeString = DateFormat.getDateTimeInstance().format(new Date());
+
+                //Toast.makeText(getApplicationContext(),currentDateTimeString,Toast.LENGTH_SHORT).show();
+
                 DatabaseReference message_root = root.child(temp_key);
                 Map<String,Object> map2 = new HashMap<String, Object>();
 
                 map2.put("Name", username);
                 map2.put("Msg", textmsg.getText().toString());
+                map2.put("Date",currentDateTimeString);
 
                 message_root.updateChildren(map2);
 
@@ -84,7 +92,7 @@ public class NewPost extends AppCompatActivity {
         @Override
         protected void onPostExecute(String aVoid) {
             super.onPostExecute(aVoid);
-            Toast.makeText(getApplicationContext(),aVoid,Toast.LENGTH_SHORT).show();
+            //Toast.makeText(getApplicationContext(),aVoid,Toast.LENGTH_SHORT).show();
 
             //progressDialog.hide();
 
@@ -117,10 +125,13 @@ public class NewPost extends AppCompatActivity {
                 JSONObject notification = new JSONObject();
                 JSONObject msg = new JSONObject();
 
+
+
                 msg.put("body", roomname+ " - "+usersent+" dice: "+message);
                 notification.put("notification",msg);
+                roomname = roomname.replace(" ","_");
                 to.put("to","/topics/"+roomname);
-                parent.put("to", "/topics/news");
+                parent.put("to", "/topics/"+roomname);
                 parent.put("notification", msg);
 
                 String post = "{ " +

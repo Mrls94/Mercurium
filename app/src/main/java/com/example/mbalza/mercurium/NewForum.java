@@ -37,6 +37,7 @@ public class NewForum extends AppCompatActivity {
     private ArrayList<CheckBox> list_of_checkbox;
     private String currentUID;
     private String currentUserName;
+    private String forumname;
 
     private EditText topicname;
     private Button addTopicbtn;
@@ -52,9 +53,15 @@ public class NewForum extends AppCompatActivity {
 
         currentUID = getIntent().getStringExtra("uid");
         currentUserName = getIntent().getStringExtra("username");
+        forumname = getIntent().getStringExtra("chatname");
 
         topicname = (EditText) findViewById(R.id.ForumNameEditText);
         addTopicbtn = (Button) findViewById(R.id.CreateForumBtn);
+
+        topicname.setText(forumname);
+        topicname.setFocusable(false);
+
+        setTitle("Crear nuevo foro - "+ forumname);
 
         addTopicbtn.setOnClickListener(new View.OnClickListener() {
             @Override

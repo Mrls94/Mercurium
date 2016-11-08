@@ -110,9 +110,17 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
             public void onClick(View v) {
 
                 Intent i = new Intent(getApplicationContext(),NewForum.class);
-                i.putExtra("username",name);
-                i.putExtra("uid",FirebaseAuth.getInstance().getCurrentUser().getUid());
-                startActivity(i);
+                if(room_name.getText().toString().length()>1)
+                {
+                    i.putExtra("chatname", room_name.getText().toString());
+                    i.putExtra("username",name);
+                    i.putExtra("uid",FirebaseAuth.getInstance().getCurrentUser().getUid());
+                    startActivity(i);
+                }
+                else
+                {
+                    Toast.makeText(getApplicationContext(),"Foro sin nombre", Toast.LENGTH_SHORT).show();
+                }
 
                 //Map<String, Object> map = new HashMap<String, Object>();
                 //map.put(room_name.getText().toString(),"" );

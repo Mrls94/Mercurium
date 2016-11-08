@@ -55,8 +55,8 @@ public class Chat_Room extends AppCompatActivity {
         mLayoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(mLayoutManager);
 
-        data.add(" empty ");
-        data.add(" empty 2");
+        //data.add(" empty ");
+        //data.add(" empty 2");
 
         mAdapter = new MyAdapter(data);
         recyclerView.setAdapter(mAdapter);
@@ -119,16 +119,18 @@ public class Chat_Room extends AppCompatActivity {
 
         Set<String> set = new HashSet<String>();
 
-        String uname, msg;
+        String uname, msg, date;
 
         Iterator i = dataSnapshot.getChildren().iterator();
 
         while (i.hasNext())
         {
+            date = (String)((DataSnapshot)i.next()).getValue();
             msg = (String)((DataSnapshot)i.next()).getValue();
             uname = (String)((DataSnapshot)i.next()).getValue();
 
-            String added = uname+" Dice:  \n"+msg+"\n \n";
+
+            String added = date+" \n"+uname+" Dice:  \n"+msg+"\n \n";
 
             chatconvsersation.append(added);
 
