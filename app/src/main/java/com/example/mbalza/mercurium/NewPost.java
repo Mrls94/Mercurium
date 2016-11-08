@@ -106,7 +106,7 @@ public class NewPost extends AppCompatActivity {
                 progressDialog = new ProgressDialog(getApplicationContext());
                 progressDialog.setTitle("Subiendo Post");
                 progressDialog.setMessage("Subiendo Post");
-                progressDialog.show();
+                //progressDialog.show();
                 uploadTask.addOnFailureListener(new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull Exception e) {
