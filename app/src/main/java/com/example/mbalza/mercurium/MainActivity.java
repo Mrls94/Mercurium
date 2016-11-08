@@ -109,6 +109,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
             @Override
             public void onClick(View v) {
 
+
+
                 Intent i = new Intent(getApplicationContext(),NewForum.class);
                 if(room_name.getText().toString().length()>1)
                 {
@@ -166,8 +168,11 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
                 FirebaseMessaging.getInstance().subscribeToTopic(roomname);
                 Intent i = new Intent(getApplicationContext(), Chat_Room.class);
+                Intent y = new Intent(getApplicationContext(),newChatroom.class);
                 i.putExtra("room_name", ((TextView)view).getText().toString());
                 i.putExtra("user_name",name);
+                y.putExtra("room_name", ((TextView)view).getText().toString());
+                y.putExtra("user_name",name);
                 startActivity(i);
 
             }

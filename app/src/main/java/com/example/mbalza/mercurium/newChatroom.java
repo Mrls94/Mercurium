@@ -1,18 +1,10 @@
 package com.example.mbalza.mercurium;
 
-import android.content.Intent;
-import android.provider.ContactsContract;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
-import android.view.View;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.ListView;
-import android.widget.TextView;
 
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
@@ -21,30 +13,20 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.Map;
 import java.util.Set;
 
-public class Chat_Room extends AppCompatActivity {
+public class newChatroom extends AppCompatActivity {
 
-    private Button sendmsg;
-    private EditText textmsg;
-    private TextView chatconvsersation;
-    private RecyclerView recyclerView;
     private ListView listViewchat;
-
-
-    private RecyclerView.Adapter mAdapter;
-    private RecyclerView.LayoutManager mLayoutManager;
+    private Button sendmsg;
 
     private String username, roomname;
-    private ArrayList<String> data = new ArrayList<>();
+
     private ArrayAdapter<String> arrayAdapter;
     private ArrayList<String> list_of_chats = new ArrayList<>();
     private ArrayList<String> list_of_images = new ArrayList<>();
-
 
     private DatabaseReference root;
     private String temp_key;
@@ -52,26 +34,17 @@ public class Chat_Room extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_chat__room);
+        setContentView(R.layout.activity_new_chatroom);
 
-        sendmsg = (Button) findViewById(R.id.buttonsend);
-        //textmsg = (EditText) findViewById(R.id.editTextMsg);
-        //chatconvsersation = (TextView) findViewById(R.id.textViewChat);
-        //recyclerView = (RecyclerView) findViewById(R.id.myRecyclerView);
 
+        list_of_chats.add("1 strubg");
+        list_of_chats.add("2 string");
+
+        listViewchat = (ListView) findViewById(R.id.Listviewnew);
         arrayAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1,list_of_chats);
-        listViewchat = (ListView) findViewById(R.id.listviewChat);
-
         listViewchat.setAdapter(arrayAdapter);
 
-        //mLayoutManager = new LinearLayoutManager(this);
-        //recyclerView.setLayoutManager(mLayoutManager);
-
-        //data.add(" empty ");
-        //data.add(" empty 2");
-
-        //mAdapter = new MyAdapter(data);
-        //recyclerView.setAdapter(mAdapter);
+        sendmsg = (Button) findViewById(R.id.buttonNewPost);
 
         username = getIntent().getStringExtra("user_name");
         roomname = getIntent().getStringExtra("room_name");
@@ -79,37 +52,6 @@ public class Chat_Room extends AppCompatActivity {
         setTitle("Room - "+roomname);
 
         root = FirebaseDatabase.getInstance().getReference().child(roomname);
-
-        listViewchat.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-
-
-
-                String url = list_of_images.get(position);
-                System.out.println(url);
-                Intent i = new Intent(getApplicationContext(),ShowImage.class);
-                i.putExtra("url",url);
-                startActivity(i);
-
-            }
-        });
-
-
-        sendmsg.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-                Intent i = new Intent(getApplicationContext(),NewPost.class);
-                i.putExtra("user_name",username);
-                i.putExtra("room_name",roomname);
-                startActivity(i);
-
-
-
-
-            }
-        });
 
         root.addChildEventListener(new ChildEventListener() {
             @Override
@@ -170,16 +112,13 @@ public class Chat_Room extends AppCompatActivity {
             set.add(added);
             imageset.add(imageurl);
 
-            list_of_images.add(imageurl);
-            list_of_chats.add(added);
-
         }
 
-        //list_of_images.clear();
-        //list_of_images.addAll(imageset);
+        list_of_images.clear();
+        list_of_images.addAll(imageset);
 
-        //list_of_chats.clear();
-        //list_of_chats.addAll(set);
+        list_of_chats.clear();
+        list_of_chats.addAll(set);
         //System.out.println(set.toString());
         arrayAdapter.notifyDataSetChanged();
         //mAdapter.notifyDataSetChanged();
